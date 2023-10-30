@@ -1,0 +1,55 @@
+from csv import reader
+import pandas as pd
+import numpy as np
+from collections import Counter
+
+def euclidean_distance(point1, point2):
+    return np.sqrt(np.sum((point1 - point2)**2))
+
+def knn_classify(X_train, y_train, X_new, k):
+    y_pred = []
+    for x in X_new:
+        distances = [euclidean_distance(x, x_train) for x_train in X_train]
+
+        k_nearest_indices = np.argsort(distances)[:k]
+
+        k_nearest_labels = [y_train[i] for i in k_nearest_indices]
+
+        majority_vote = Counter(k_nearest_labels).most_common(1)[0][0]
+        y_pred.append(majority_vote)
+
+    return y_pred
+
+def main():
+    filename = "diabetes.csv"
+    data = pd.read_csv(filename)
+
+
+    X = data.iloc[:, :-1].values
+    y = data.iloc[:, -1].values
+
+    split_ratio = 0.8
+    num_train_samples = int(len(data) * split_ratio)
+    X_train, X_test = X[:num_train_samples], X[num_train_samples:]
+    y_train, y_test = y[:num_train_samples], y[num_train_samples:]
+
+    k = eval(input("Enter the K size:"))
+
+    random_test_index = np.random.randint(len(X_test))
+    X_new_single = X_test[random_test_index]
+    y_new_single = y_test[random_test_index]
+
+    y_pred_single = knn_classify(X_train, y_train, [X_new_single], k)
+
+    print("Sample of test data:")
+    print(data.head(5))
+    print("Selected Test Data:")
+    print("Features:", X_new_single)
+    print("Actual Label:", y_new_single)
+    print("Predicted Label:", y_pred_single[0])
+
+    accuracy_single = 1.0 if y_pred_single[0] == y_new_single else 0.0
+    print(f"Accuracy for the Selected Test Data Point: {accuracy_single*100:.2f}")
+
+if __name__ == "__main__":
+    main()

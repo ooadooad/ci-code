@@ -1,0 +1,52 @@
+import pandas as pd
+import numpy as np
+def entropy(class_counts):
+    total = sum(class_counts)
+    entropy_val = 0
+    for count in class_counts:
+        if count == 0:
+            continue
+        proportion = count / total
+        entropy_val -= proportion * np.log2(proportion)
+    return entropy_val
+def calculate_entropies(data, target_col):
+    entropies = dict()
+    for i in data.columns[:-1]:
+        entropies[i] = dict()
+        for j in data[i].unique():
+            class_counts = [len(data[(data[i] == j) & (data[target_col] == c)]) for c in data[target_col].unique()]
+            entropies[i][j] = entropy(class_counts)
+    return entropies
+def calculate_information(data, target_col, entropies):
+    info = dict()
+    tot_d = len(data)
+    for col in data.columns[:-1]:
+        info[col] = 0
+        for val in data[col].unique():
+            sub_data = data[data[col] == val]
+            class_counts = [len(sub_data[sub_data[target_col] == c]) for c in data[target_col].unique()]
+            info[col] += (len(sub_data) / tot_d) * entropy(class_counts)
+    return info
+data = pd.read_csv('Buy_Computer.csv')
+#data = pd.read_csv('PlayTennis.csv')
+#data = pd.read_csv('Iris.csv')
+target_col = data.columns[-1]
+entropies = calculate_entropies(data, target_col)
+print("Entropy values for each column:")
+print(entropies)
+print("Weighted Entropy for each column:")
+info = calculate_information(data, target_col, entropies)
+print(info)
+class_counts = [len(data[data[target_col] == c]) for c in data[target_col].unique()]
+entropy_d = entropy(class_counts)
+print("Entropy before splitting:")
+print(entropy_d)
+info_gain = dict()
+for k, v in info.items():
+    info_gain[k] = round(entropy_d - v, 4)
+info_gain = sorted(info_gain.items(), key=lambda x: x[1], reverse=True)
+best_feature, max_info_gain = info_gain[0]
+print("Information Gain for each column:")
+print(info_gain)
+print("Feature with highest information gain:", best_feature)
+print("Highest information gain:", max_info_gain)
