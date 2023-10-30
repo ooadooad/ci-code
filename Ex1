@@ -1,0 +1,158 @@
+class Graph:
+    def __init__(self):
+        self.nodes = set()
+        self.edges = set()
+
+    def add_node(self, node):
+        if node not in self.nodes:
+            self.nodes.add(node)
+        else:
+            print("Node already exists!")
+
+    def add_edge(self, u, v):
+        if (u, v) not in self.edges:
+            self.edges.add((u, v))
+            self.edges.add((v, u))
+        else:
+            print("Edge already present between them!")
+
+    def delete_node(self, node):
+        if node in self.nodes:
+            self.nodes.discard(node)
+            self.edges = {(u, v) for (u, v) in self.edges if u != node and v != node}
+        else:
+            print("The given node is not present!")
+
+    def delete_edge(self, u, v):
+        if (u, v) in self.edges:
+            self.edges.discard((u, v))
+            self.edges.discard((v, u))
+        else:
+            print("Edge doesn't exist between them!")
+
+    def get_adjacent_nodes(self, node):
+        return [v for (u, v) in self.edges if u == node]
+
+    def bfs(self, start, end):
+        bfs_path = []
+        s = 0
+        queue = [start]
+        visited = set()
+        while queue:
+            node = queue.pop(0)
+            bfs_path.append(node)
+            if node == end:
+                return s, bfs_path
+            visited.add(node)
+            adjacent_nodes = self.get_adjacent_nodes(node)
+            for adj_node in adjacent_nodes:
+                if adj_node not in visited:
+                    queue.append(adj_node)
+                    visited.add(adj_node)
+        return -1, []
+
+    def dfs(self, start, end):
+        dfs_path = []
+        s = 0
+        stack = [start]
+        visited = set()
+        while stack:
+            node = stack.pop()
+            dfs_path.append(node)
+            if node == end:
+                return s, dfs_path
+            visited.add(node)
+            adjacent_nodes = self.get_adjacent_nodes(node)
+            for adj_node in adjacent_nodes:
+                if adj_node not in visited:
+                    stack.append(adj_node)
+                    visited.add(adj_node)
+        return -1, []
+
+    def display_adjacent_nodes(self, node):
+        if node in self.nodes:
+            adjacent_nodes = self.get_adjacent_nodes(node)
+            if len(adjacent_nodes) == 0:
+                print("The given node doesn't have any adjacency nodes!")
+            else:
+                print(f"Adjacent nodes of {node}: {adjacent_nodes}")
+        else:
+            print("No such nodes exist!")
+
+
+if __name__ == '__main__':
+    print("Welcome to the graph!")
+    print("Would you like to build a graph? (Y/N)")
+    answer = input()
+    if answer == "Y":
+        graph = Graph()
+        print("Enter the nodes of the graph (space-separated):")
+        nodes = input().split()
+        for node in nodes:
+            graph.add_node(node)
+
+        print("Enter the edges of the graph (in the format 'node1-node2' separated by spaces):")
+        edges = input().split()
+        for edge in edges:
+            vertex1, vertex2 = edge.split("-")
+            graph.add_edge(vertex1, vertex2)
+    else:
+        graph = None
+
+    while graph:
+        print('1 - Add Node!')
+        print('2 - Add Edge!')
+        print('3 - Display Graph!')
+        print('4 - BFS!')
+        print('5 - DFS!')
+        print('6 - Delete a Node!')
+        print('7 - Delete an Edge!')
+        print('8 - Display Adjacency!')
+        print('9 - Exit!')
+        ch = int(input())
+        print(ch)
+        if ch == 1:
+            name = input('Enter Node Name: ')
+            graph.add_node(name)
+        elif ch == 2:
+            u, v = input('Enter edge as u v: ').split()
+            graph.add_edge(u, v)
+        elif ch == 3:
+            print("Nodes")
+            if len(graph.nodes) != 0:
+                print('Nodes:', graph.nodes)
+            else:
+                print("Empty!!")
+            print("Edges")
+            if len(graph.edges) != 0:
+                print('Edges:', graph.edges)
+            else:
+                print("Empty!!")
+        elif ch == 4:
+            start, end = input('Enter starting and ending node: ').split()
+            s, bfs_path = graph.bfs(start, end)
+            if s == -1:
+                print('No path exists!')
+            else:
+                print('BFS Path:', bfs_path)
+        elif ch == 5:
+            start, end = input('Enter starting and ending node: ').split()
+            s, dfs_path = graph.dfs(start, end)
+            if s == -1:
+                print('No path exists!')
+            else:
+                print('DFS Path:', dfs_path)
+        elif ch == 6:
+            node = input("Enter the node to be deleted: ")
+            graph.delete_node(node)
+        elif ch == 7:
+            u = input('Enter the first node: ')
+            v = input('Enter the second node: ')
+            graph.delete_edge(u, v)
+        elif ch == 8:
+            node = input("Enter the node to display adjacent nodes: ")
+            graph.display_adjacent_nodes(node)
+        elif ch == 9:
+            break
+        else:
+            print('Invalid Input')
